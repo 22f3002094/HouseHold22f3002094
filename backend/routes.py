@@ -10,3 +10,8 @@ def index():
 def home():
     return "welcome to home"
 
+
+@app.route("/login")
+def login():
+    return "welcome to login"
+
