@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="d-flex justify-content-center">
+        <div class="card mt-5" style="width: 30%;">
+            <div class="card-header">
+                Login
+            </div>
+            <div class="card-body">
+                <form action="/login" method="POST">
+                    
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" name="email">
+                        <label for="email">Email</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="password" name="password">
+                        <label for="password">Password</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <select class="form-control" id="role" name="role">
+                            
+                                <option value="admin" >Admin</option>
+                                <option value="customer">Customer</option>
+                                <option value="professional">Professional</option>
+                               
+
+                        </select>
+                        <label for="role">Role</label>
+                    </div>
+
+
+                    <button class="btn btn-warning">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
