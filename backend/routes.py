@@ -1,6 +1,7 @@
 from app import app
 from flask import render_template,request ,redirect
 from .models import db, Admin , ServiceCategory, User , ServiceProfessional 
+from flask_login import login_user , login_required , current_user
 
 @app.route("/")
 def index():
@@ -74,55 +75,58 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
         # 1st Logic
-        # u = db.session.query(Admin).filter_by(email=email).first() or \
-        #     db.session.query(User).filter_by(email=email).first() or \
-        #         db.session.query(ServiceProfessional).filter_by(email=email).first()
+        u = db.session.query(Admin).filter_by(email=email).first() or \
+            db.session.query(User).filter_by(email=email).first() or \
+                db.session.query(ServiceProfessional).filter_by(email=email).first()
 
-        # if u:
-        #     if u.password==password:
-        #         if isinstance(u , Admin):
-        #             return redirect("/admin/dashboard")
-        #         elif isinstance(u ,User ):
-        #             return redirect("/customer/dashboard")
-        #         elif isinstance(u , ServiceProfessional):
-        #             return redirect("/professional/dashboard")
-        #     else:
-        #         return "incorrect password"
-        # else:
-        #     return "email doesn't exist"
+        if u:
+            if u.password==password:
+                if isinstance(u , Admin):
+                    login_user(u)
+                    return redirect(f"/admin/dashboard" , )
+                elif isinstance(u ,User ):
+                    login_user(u)
+                    return redirect(f"/customer/dashboard")
+                elif isinstance(u , ServiceProfessional):
+                    login_user(u)
+                    return redirect(f"/professional/dashboard")
+            else:
+                return "incorrect password"
+        else:
+            return "email doesn't exist"
 
 
         ####2nd logic
 
-        role = request.form.get("role")
+        # role = request.form.get("role")
 
-        if role == "admin":
-            ad = db.session.query(Admin).filter_by(email = email).first()
-            if ad:
-                if ad.password == password:
-                    return redirect("/admin/dashboard")
-                else:
-                    return "incorrect password"
-            else:
-                return "email doesn't exist for admin"
-        elif role == "customer":
-            cust = db.session.query(User).filter_by(email = email).first()
-            if cust:
-                if cust.password == password:
-                    return redirect("/customer/dashboard")
-                else:
-                    return "incorrect password"
-            else:
-                return "email doesn't exist for customer"
-        elif role == "professional":
-            prof = db.session.query(ServiceProfessional).filter_by(email = email).first()
-            if prof:
-                if prof.password == password:
-                    return redirect("/professional/dashboard")
-                else:
-                    return "incorrect password"
-            else:
-                return "email doesn't exist for professional"
+        # if role == "admin":
+        #     ad = db.session.query(Admin).filter_by(email = email).first()
+        #     if ad:
+        #         if ad.password == password:
+        #             return redirect("/admin/dashboard")
+        #         else:
+        #             return "incorrect password"
+        #     else:
+        #         return "email doesn't exist for admin"
+        # elif role == "customer":
+        #     cust = db.session.query(User).filter_by(email = email).first()
+        #     if cust:
+        #         if cust.password == password:
+        #             return redirect("/customer/dashboard")
+        #         else:
+        #             return "incorrect password"
+        #     else:
+        #         return "email doesn't exist for customer"
+        # elif role == "professional":
+        #     prof = db.session.query(ServiceProfessional).filter_by(email = email).first()
+        #     if prof:
+        #         if prof.password == password:
+        #             return redirect("/professional/dashboard")
+        #         else:
+        #             return "incorrect password"
+        #     else:
+        #         return "email doesn't exist for professional"
             
         
         
@@ -131,15 +135,26 @@ def login():
 
 
 @app.route("/admin/dashboard")
+@login_required
 def admin_dash():
-    return "welcome to admin"
+    return render_template("/admin/dashboard.html")
 
 
 @app.route("/customer/dashboard")
+@login_required
 def cust_dash():
-    return "welcome to customer"
+
+    return render_template("/customer/dashboard.html")
 
 @app.route("/professional/dashboard")
+@login_required
 def prof_dash():
-    return "welcome to professional"
+    
+    return render_template("/professional/dashboard.html" , current_prof = current_user)
 
+
+
+@app.route("/professional/stats")
+@login_required
+def prof_stats():
+    return f"Welcome to {current_user.name}  stats"
