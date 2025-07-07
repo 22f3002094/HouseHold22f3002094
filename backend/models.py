@@ -28,6 +28,7 @@ class User(db.Model , UserMixin):
     password = db.Column(db.String , nullable= False)
     address = db.Column(db.String, nullable = False)
     city = db.Column(db.String, nullable=False)
+    status = db.Column(db.String , nullable = False)
     phone = db.Column(db.String , nullable = False)
     created_bookings= db.relationship("Booking" , backref="user" )
     def get_id(self):
@@ -42,6 +43,7 @@ class ServiceProfessional(db.Model , UserMixin):
     password = db.Column(db.String , nullable= False)
     city = db.Column(db.String, nullable=False)
     phone = db.Column(db.String , nullable = False)
+    status = db.Column(db.String , nullable = False)
     cat_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
     packages= db.relationship("ServicePackage" , backref="professional" )
     recieved_bookings= db.relationship("Booking" , backref="professional" )

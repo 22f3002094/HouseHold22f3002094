@@ -32,7 +32,7 @@ def register():
                 return "email already exist"
             else:
                 
-                new_prof = ServiceProfessional(name=p_name , email=p_email , password = p_password,
+                new_prof = ServiceProfessional(name=p_name , email=p_email , password = p_password,status="Requested" ,
                                                city = p_city , phone = p_phone , cat_id = p_cat )
                 db.session.add(new_prof)
                 db.session.commit()
@@ -51,7 +51,7 @@ def register():
                 return "email already exist"
             else:
                 
-                new_cust= User(name=c_name , email=c_email , password =c_password,
+                new_cust= User(name=c_name , email=c_email , password =c_password,status="Active" , 
                                                city = c_city , phone = c_phone , address=c_address )
                 db.session.add(new_cust)
                 db.session.commit()
@@ -137,7 +137,12 @@ def login():
 @app.route("/admin/dashboard")
 @login_required
 def admin_dash():
-    return render_template("/admin/dashboard.html")
+    all_cats = db.session.query(ServiceCategory).all()
+    active_prof = db.session.query(ServiceProfessional).filter_by(status="Active").all()
+    requested_prof = db.session.query(ServiceProfessional).filter_by(status="Requested").all()
+    flagged_prof = db.session.query(ServiceProfessional).filter_by(status="Flagged").all()
+    return render_template("/admin/dashboard.html", all_cats = all_cats , active_prof = active_prof , requested_prof=requested_prof, flagged_prof=flagged_prof)
+
 
 
 @app.route("/customer/dashboard")
@@ -158,3 +163,34 @@ def prof_dash():
 @login_required
 def prof_stats():
     return f"Welcome to {current_user.name}  stats"
+
+
+
+
+@app.route("/category" , methods=["POST"])
+def category():
+    if request.args.get("task") =="create":
+        cat_name = request.form.get("cat_name")
+        
+        cat = db.session.query(ServiceCategory).filter_by(name=cat_name).first()
+        if cat : 
+            return "Category already exist"
+        else:
+            new_cat = ServiceCategory(name=cat_name)
+            db.session.add(new_cat)
+            db.session.commit()
+            return redirect("/admin/dashboard")
+    elif request.args.get("task") =="edit":
+        cat_name = request.form.get("cat_name")
+        cat = db.session.query(ServiceCategory).filter_by(name=cat_name).first()
+        if cat:
+            cat.name  = cat_name
+            db.session.commit()
+        else:
+            return "category doesn't exit"
+        
+
+        
+
+
+
