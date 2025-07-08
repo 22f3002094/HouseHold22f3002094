@@ -45,6 +45,17 @@
             </div>
         </div>
     </nav>
+    {% set messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages%}
+
+            <div class="alert alert-warning alert-dismissible fade show mt-3 ms-5 me-5" role="alert">
+                {{message}}
+                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
 
     <div class="card shadow-lg ms-5 me-5 mt-4 text-center">
         <div class="card-header">
@@ -176,6 +187,9 @@
                                 <th scope="col">Email</th>
                                 <th scope="col">City</th>
                                 <th scope="col">Phone</th>
+                                <th scope="col">
+                                    Actions
+                                </th>
 
 
                             </tr>
@@ -188,6 +202,38 @@
                                 <td>{{ap.email}}</td>
                                 <td>{{ap.city}}</td>
                                 <td>{{ap.phone}}</td>
+                                <td>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#flag-prof-{{ap.id}}">
+                                        Flag
+                                    </button>
+                                    <div class="modal fade" id="flag-prof-{{ap.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Flag {{ap.name}}
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to flag {{ap.name}}?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/professional?task=flag&prof_id={{ap.id}}" method="POST">
+                                                                                                            
+                                                        <button type="submit" class="btn btn-success">Yes</button>
+
+                                                    </form> 
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                                                </div>
+                                                                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </td>
                             </tr>
                             {% endfor %}
 
@@ -213,6 +259,7 @@
                                 <th scope="col">Email</th>
                                 <th scope="col">City</th>
                                 <th scope="col">Phone</th>
+                                <th scope="col">Actions</th>
 
 
                             </tr>
@@ -225,6 +272,66 @@
                                 <td>{{rp.email}}</td>
                                 <td>{{rp.city}}</td>
                                 <td>{{rp.phone}}</td>
+                                <td>
+                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#accept-prof-{{rp.id}}">Accept</button>
+                                    <div class="modal fade" id="accept-prof-{{rp.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Accept {{rp.name}}'s Request
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to Accept {{rp.name}}'s Request?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/professional?task=accept&prof_id={{rp.id}}" method="POST">
+                                                                                                            
+                                                        <button type="submit" class="btn btn-success">Yes</button>
+
+                                                    </form> 
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                                                </div>
+                                                                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reject-prof-{{rp.id}}">Reject</button>
+                                    <div class="modal fade" id="reject-prof-{{rp.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Reject {{rp.name}}'s Request
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to Reject {{rp.name}}'s Request?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/professional?task=reject&prof_id={{rp.id}}" method="POST">
+                                                                                                            
+                                                        <button type="submit" class="btn btn-success">Yes</button>
+
+                                                    </form> 
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                                                </div>
+                                                                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+
+                                </td>
                             </tr>
                             {% endfor %}
 
@@ -250,18 +357,227 @@
                                 <th scope="col">Email</th>
                                 <th scope="col">City</th>
                                 <th scope="col">Phone</th>
+                                <th scope="col">Actions</th>
 
 
                             </tr>
                         </thead>
                         <tbody>
-                            {% for fp in active_prof %}
+                            {% for fp in flagged_prof %}
                             <tr>
                                 <td>{{fp.name}}</td>
                                 <td>{{fp.category.name}}</td>
                                 <td>{{fp.email}}</td>
                                 <td>{{fp.city}}</td>
                                 <td>{{fp.phone}}</td>
+                                <td>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#unflag-prof-{{fp.id}}">
+                                        UnFlag
+                                    </button>
+                                    <div class="modal fade" id="unflag-prof-{{fp.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">UnFlag {{fp.name}}
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to unflag {{fp.name}}?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/professional?task=unflag&prof_id={{fp.id}}" method="POST">
+                                                                                                            
+                                                        <button type="submit" class="btn btn-success">Yes</button>
+
+                                                    </form> 
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                                                </div>
+                                                                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="text-center ">
+                        <p> No flagged professional are there</p>
+                    </div>
+
+
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+    <!-- customer -->
+
+
+    <div class="card mt-4 ms-5 me-5 shadow-lg mb-3">
+        <div class="card-header">
+            <h5>Customers</h5>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="pills-Activecust-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-Activecust" type="button" role="tab" aria-controls="pills-Activecust"
+                        aria-selected="true">Active</button>
+                </li>
+                
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pills-flaggedcust-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-flaggedcust" type="button" role="tab" aria-controls="pills-flaggedcust"
+                        aria-selected="false">Flagged</button>
+                </li>
+
+            </ul>
+            <div class="tab-content" id="pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-Activecust" role="tabpanel"
+                    aria-labelledby="pills-Activecust-tab" tabindex="0">
+                    {% if active_cust %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">City</th>
+                                <th scope="col">Phone</th>
+                                <th scope="col">
+                                    Actions
+                                </th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ac in active_cust %}
+                            <tr>
+                                <td>{{ac.name}}</td>
+                                <td>{{ac.address}}</td>
+                                <td>{{ac.email}}</td>
+                                <td>{{ac.city}}</td>
+                                <td>{{ac.phone}}</td>
+                                <td>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#flag-cust-{{ac.id}}">
+                                        Flag
+                                    </button>
+                                    <div class="modal fade" id="flag-cust-{{ac.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">Flag {{ac.name}}
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to flag {{ac.name}}?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/customer?task=flag&cust_id={{ac.id}}" method="POST">
+                                                                                                            
+                                                        <button type="submit" class="btn btn-success">Yes</button>
+
+                                                    </form> 
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                                                </div>
+                                                                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="text-center ">
+                        <p> No Active Customers are there</p>
+                    </div>
+
+
+                    {% endif %}
+
+                </div>
+                
+                <div class="tab-pane fade" id="pills-flaggedcust" role="tabpanel"
+                    aria-labelledby="pills-flaggedcust-tab" tabindex="0">
+                    {% if flagged_cust %}
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Address</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">City</th>
+                                <th scope="col">Phone</th>
+                                <th scope="col">Actions</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fc in flagged_cust %}
+                            <tr>
+                                <td>{{fc.name}}</td>
+                                <td>{{fc.address}}</td>
+                                <td>{{fc.email}}</td>
+                                <td>{{fc.city}}</td>
+                                <td>{{fc.phone}}</td>
+                                <td>
+                                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#unflag-cust-{{fc.id}}">
+                                        UnFlag
+                                    </button>
+                                    <div class="modal fade" id="unflag-cust-{{fc.id}}" tabindex="-1"
+                                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h1 class="modal-title fs-5" id="exampleModalLabel">UnFlag {{fc.name}}
+                                                    </h1>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to unflag {{fc.name}}?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form action="/customer?task=unflag&cust_id={{fc.id}}" method="POST">
+                                                                                                            
+                                                        <button type="submit" class="btn btn-success">Yes</button>
+
+                                                    </form> 
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                                                </div>
+                                                                                                    </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    
+                                </td>
                             </tr>
                             {% endfor %}
 

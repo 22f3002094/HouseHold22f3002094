@@ -1,7 +1,10 @@
 from app import app
-from flask import render_template,request ,redirect
+from flask import render_template,request ,redirect,flash
 from .models import db, Admin , ServiceCategory, User , ServiceProfessional 
 from flask_login import login_user , login_required , current_user
+from flask_sqlalchemy import SQLAlchemy
+
+from sqlalchemy import and_
 
 @app.route("/")
 def index():
@@ -91,9 +94,11 @@ def login():
                     login_user(u)
                     return redirect(f"/professional/dashboard")
             else:
-                return "incorrect password"
+                flash("Incorrect password")
+                return redirect("/login")
         else:
-            return "email doesn't exist"
+            flash("Email doesn't exist")
+            return redirect("/login")
 
 
         ####2nd logic
@@ -141,7 +146,12 @@ def admin_dash():
     active_prof = db.session.query(ServiceProfessional).filter_by(status="Active").all()
     requested_prof = db.session.query(ServiceProfessional).filter_by(status="Requested").all()
     flagged_prof = db.session.query(ServiceProfessional).filter_by(status="Flagged").all()
-    return render_template("/admin/dashboard.html", all_cats = all_cats , active_prof = active_prof , requested_prof=requested_prof, flagged_prof=flagged_prof)
+    active_cust = db.session.query(User).filter_by(status="Active").all()
+    flagged_cust = db.session.query(User).filter_by(status="Flagged").all()
+
+    return render_template("/admin/dashboard.html", all_cats = all_cats , active_prof = active_prof , 
+                           requested_prof=requested_prof, flagged_prof=flagged_prof ,
+                           active_cust=active_cust,flagged_cust=flagged_cust)
 
 
 
@@ -174,11 +184,13 @@ def category():
         
         cat = db.session.query(ServiceCategory).filter_by(name=cat_name).first()
         if cat : 
-            return "Category already exist"
+            flash("Category already exist")
+            return redirect("/admin/dashboard")
         else:
             new_cat = ServiceCategory(name=cat_name)
             db.session.add(new_cat)
             db.session.commit()
+            flash("Category Created.")
             return redirect("/admin/dashboard")
     elif request.args.get("task") =="edit":
         cat_name = request.form.get("cat_name")
@@ -186,11 +198,95 @@ def category():
         if cat:
             cat.name  = cat_name
             db.session.commit()
+            flash("Category is updated")
+            return redirect("/admin/dashboard")
         else:
-            return "category doesn't exit"
+            flash("category doen't exist")
+            return redirect("/admin/dashboard")
         
 
         
 
+@app.route("/professional" , methods=["POST"])
+def professional():
+    if request.args.get("task") == "flag":
+        prof_id = request.args.get("prof_id")
+        prof = db.session.query(ServiceProfessional).filter_by(id = prof_id).first()
+        if prof:
+            prof.status = "Flagged"
+            db.session.commit()
+            flash(f"{prof.name} is flagged")
+            return redirect("/admin/dashboard")
+    elif request.args.get("task") == "unflag":
+        prof_id = request.args.get("prof_id")
+        prof = db.session.query(ServiceProfessional).filter_by(id = prof_id).first()
+        if prof:
+            prof.status = "Active"
+            db.session.commit()
+            flash(f"{prof.name} is unflagged")
+            return redirect("/admin/dashboard")
+    elif request.args.get("task") == "accept":
+        prof_id = request.args.get("prof_id")
+        prof = db.session.query(ServiceProfessional).filter_by(id = prof_id).first()
+        if prof:
+            prof.status = "Active"
+            db.session.commit()
+            flash(f"{prof.name}'s request is accepted")
+            return redirect("/admin/dashboard")
+    elif request.args.get("task") == "reject":
+        prof_id = request.args.get("prof_id")
+        prof = db.session.query(ServiceProfessional).filter_by(id = prof_id).first()
+        if prof:
+            prof.status = "Rejected"
+            db.session.commit()
+            flash(f"{prof.name}'s request is Rejected")
+            return redirect("/admin/dashboard")
 
 
+
+
+@app.route("/customer" , methods=["POST"])
+def customer():
+    if request.args.get("task") == "flag":
+        cust_id = request.args.get("cust_id")
+        cust = db.session.query(User).filter_by(id = cust_id).first()
+        if cust:
+            cust.status = "Flagged"
+            db.session.commit()
+            flash(f"{cust.name} is flagged")
+            return redirect("/admin/dashboard")
+    elif request.args.get("task") == "unflag":
+        cust_id = request.args.get("cust_id")
+        cust = db.session.query(User).filter_by(id = cust_id).first()
+        if cust:
+            cust.status = "Active"
+            db.session.commit()
+            flash(f"{cust.name} is unflagged")
+            return redirect("/admin/dashboard")
+
+
+
+   
+#dummy praking spot booking route
+# @app.route("/booking" , methods=["POST"])
+# def booking():
+#     if request.args.get("p_lot_id"):
+#         p_id = request.args.get("p_lot_id")
+#         spot = db.session.query(ParkingSpots).filter(and_(  
+#                                                         ParkingSpots.parkinglot_id == p_id ,
+#                                                        ParkingSpots.status == "available" )).first()
+        
+#         if spot:
+        
+#             book = Booking(p_id = P_id , spot_id = spot.id , user_id = current_user.id , booking.status="booked" )
+#             db.session.add(book)
+#             db.session.commit()
+#             spot.status = "occupied"
+#             db.session.commit()
+#             flash("booked")
+#             return redirect("/customer/dashboared")
+
+#         else:
+#             flash("not")
+
+    

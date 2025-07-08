@@ -10,6 +10,17 @@
 </head>
 
 <body>
+    {% set messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages%}
+
+            <div class="alert alert-warning alert-dismissible fade show mt-3 ms-5 me-5" role="alert">
+                {{message}}
+                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="d-flex justify-content-center">
         <div class="card mt-5" style="width: 30%;">
             <div class="card-header">
@@ -17,7 +28,7 @@
             </div>
             <div class="card-body">
                 <form action="/login" method="POST">
-                    
+
                     <div class="form-floating mb-3">
                         <input type="email" class="form-control" id="email" name="email">
                         <label for="email">Email</label>
@@ -26,7 +37,7 @@
                         <input type="password" class="form-control" id="password" name="password">
                         <label for="password">Password</label>
                     </div>
-                        <!-- <div class="form-floating mb-3">
+                    <!-- <div class="form-floating mb-3">
                             <select class="form-control" id="role" name="role">
                                 
                                     <option value="admin" >Admin</option>
