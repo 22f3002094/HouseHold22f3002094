@@ -1,8 +1,9 @@
 from app import app
 from flask import render_template,request ,redirect,flash
-from .models import db, Admin , ServiceCategory, User , ServiceProfessional 
+from .models import db, Admin , ServiceCategory, User , ServiceProfessional , ServicePackage, Booking
 from flask_login import login_user , login_required , current_user
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy 
+from datetime import datetime
 
 from sqlalchemy import and_
 
@@ -158,14 +159,64 @@ def admin_dash():
 @app.route("/customer/dashboard")
 @login_required
 def cust_dash():
+    all_cats = db.session.query(ServiceCategory).all()
+    active_bookings = []
+    requested_bookings=[]
+    other_bookings = []
+   
 
-    return render_template("/customer/dashboard.html")
+    for booking in current_user.created_bookings:
+        if booking.status =="Active" or booking.status=="Started" or booking.status=="Finished":
+            active_bookings.append(booking)
+        elif booking.status =="Requested":
+            requested_bookings.append(booking)
+        else:
+            other_bookings.append(booking)
+        
+            
+
+    return render_template("/customer/dashboard.html",  current_cust = current_user, all_cats=all_cats ,
+                           active_bookings = active_bookings, requested_bookings=requested_bookings, other_bookings=other_bookings)
+
+
+
+
+
+@app.route("/customer/search" , methods = ["GET" , "POST"])
+def cust_search(): 
+    if request.method == "GET" and request.args.get("cat_id"):
+        cat = db.session.query(ServiceCategory).filter_by(id = request.args.get("cat_id")).first()
+        packages=[]
+        for pack in cat.packages:
+            if pack.professional.city == current_user.city:
+                packages.append(pack)
+
+        return render_template("/customer/search.html" ,current_cust=current_user , search_result =packages)
 
 @app.route("/professional/dashboard")
 @login_required
 def prof_dash():
+
+    active_bookings=[]
+    requested_bookings = []
+    other_bookings = []
+
+    todaysdate = datetime.now().strftime("%Y-%m-%d")
+    todays_bookings = []
+    print(type(todaysdate))
+    for booking in current_user.recieved_bookings:
+        if ( booking.status =="Active" or booking.status=="Started" or booking.status=="Finished" ) and booking.date == todaysdate:
+                todays_bookings.append(booking)
+        elif booking.status=="Active":
+            active_bookings.append(booking)
+        elif booking.status == "Requested":
+            requested_bookings.append(booking)
+        else:
+            other_bookings.append(booking)
+
     
-    return render_template("/professional/dashboard.html" , current_prof = current_user)
+    return render_template("/professional/dashboard.html" , current_prof = current_user , 
+                           active_bookings= active_bookings , requested_bookings = requested_bookings , other_bookings = other_bookings , todays_bookings = todays_bookings)
 
 
 
@@ -263,6 +314,102 @@ def customer():
             db.session.commit()
             flash(f"{cust.name} is unflagged")
             return redirect("/admin/dashboard")
+
+
+    
+@app.route("/package" , methods=["POST"])
+def package():
+    if request.args.get("task") == "create":
+        pack_name = request.form.get("pack_name")
+        pack_price = request.form.get("pack_price")
+        pack = db.session.query(ServicePackage).filter_by(name=pack_name).first()
+        if pack:
+            flash(f"Package with name {pack_name} already exist. user different name")
+            return redirect("/professional/dashboard")
+        
+        else:
+            
+            new_pack = ServicePackage(name = pack_name , price= pack_price , prof_id = current_user.id , 
+                                      cat_id = current_user.category.id)
+            db.session.add(new_pack)
+            db.session.commit()
+            flash("Package is created")
+            return redirect("/professional/dashboard")
+    elif request.args.get("task") == "edit":
+        pack_id = request.args.get("pack_id")
+        pack_name = request.form.get("pack_name")
+        pack_price = request.form.get("pack_price")
+        pack = db.session.query(ServicePackage).filter_by(id=pack_id).first()
+        if not pack:
+            flash(f"Package doesn't exist.")
+            return redirect("/professional/dashboard")
+        
+        else:
+            if pack_name:
+                pack.name = pack_name
+            
+            db.session.commit()
+            flash("Package is updated")
+            return redirect("/professional/dashboard")
+
+
+@app.route("/booking" , methods=["POST"])
+def booking():
+    if request.args.get("task") == "accept":
+        book_id = request.args.get("book_id")
+        book = db.session.query(Booking).filter_by(id = book_id).first()
+        if book:
+            book.status = "Active"
+            db.session.commit()
+            flash("Booking request accepted")
+            return redirect("/professional/dashboard")
+        else:
+            flash("booking doesn't exist")
+            return redirect("/professional/dashboard")
+    elif request.args.get("task") == "reject":
+        book_id = request.args.get("book_id")
+        book = db.session.query(Booking).filter_by(id = book_id).first()
+        book.status = "Rejected"
+        db.session.commit()
+        flash("Booking request Rejected")
+        return redirect("/professional/dashboard")
+    elif request.args.get("task") =="book":
+        prof_id = request.args.get("prof_id")
+        pack_id = request.args.get("pack_id")
+        date = request.form.get("b_date")
+        time = request.form.get("b_time")
+        newbooking = Booking(date= date , time =time , prof_id = prof_id , pack_id= pack_id, user_id = current_user.id , status="Requested")
+        db.session.add(newbooking)
+        db.session.commit()
+        flash("booking is creted")
+        return redirect("/customer/dashboard")
+    elif request.args.get("task") =="start":
+        book_id = request.args.get("book_id")
+        book = db.session.query(Booking).filter_by(id = book_id).first()
+        if book:
+            book.status = "Started"
+            db.session.commit()
+            flash("Booking started")
+            return redirect("/professional/dashboard")
+    elif request.args.get("task") =="finish":
+        book_id = request.args.get("book_id")
+        book = db.session.query(Booking).filter_by(id = book_id).first()
+        if book:
+            book.status = "Finished"
+            db.session.commit()
+            flash("Booking FInished")
+            return redirect("/professional/dashboard")
+    elif request.args.get("task") =="close":
+        book_id = request.args.get("book_id")
+        book = db.session.query(Booking).filter_by(id = book_id).first()
+        if book:
+            book.status = "Closed"
+            db.session.commit()
+            flash("Booking customer")
+            return redirect("/customer/dashboard")
+       
+        
+
 
 
 

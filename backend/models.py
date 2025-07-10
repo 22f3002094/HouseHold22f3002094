@@ -18,6 +18,7 @@ class ServiceCategory(db.Model):
     id = db.Column(db.Integer , primary_key = True , autoincrement=True )
     name = db.Column(db.String  ,unique=True, nullable = False)
     professionals= db.relationship("ServiceProfessional" , backref="category" )
+    packages= db.relationship("ServicePackage" , backref="category" )
 
     
 class User(db.Model , UserMixin):
@@ -76,5 +77,3 @@ class Booking(db.Model):
 
 
 
-
- 
