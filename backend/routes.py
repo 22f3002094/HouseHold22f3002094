@@ -5,7 +5,7 @@ from flask_login import login_user , login_required , current_user
 from flask_sqlalchemy import SQLAlchemy 
 from datetime import datetime
 
-from sqlalchemy import and_
+from sqlalchemy import and_ 
 
 @app.route("/")
 def index():
@@ -154,6 +154,25 @@ def admin_dash():
                            requested_prof=requested_prof, flagged_prof=flagged_prof ,
                            active_cust=active_cust,flagged_cust=flagged_cust)
 
+@app.route("/admin/search" , methods=["GET" , "POST"])
+def admin_search():
+    if request.method =="GET":
+        return render_template("/admin/search.html")
+    elif request.method =="POST":
+        type = request.form.get("search_type")
+        query = request.form.get("search_query")
+        if type =="category":
+            results = db.session.query(ServiceCategory).filter( ServiceCategory.name.ilike(f"%{query}%")).all()
+            return render_template("/admin/search.html" , results = results , type = type )
+        elif type == "professional":
+            results = db.session.query(ServiceProfessional).filter( ServiceProfessional.name.ilike(f"%{query}%")).all()
+            return render_template("/admin/search.html" , results = results , type =type)
+        elif type == "customer":
+            results = db.session.query(User).filter( User.name.ilike(f"%{query}%")).all()
+            return render_template("/admin/search.html" , results = results , type=type )
+        
+
+
 
 
 @app.route("/customer/dashboard")
@@ -192,6 +211,15 @@ def cust_search():
                 packages.append(pack)
 
         return render_template("/customer/search.html" ,current_cust=current_user , search_result =packages)
+    elif request.method=="GET":
+        return render_template("/customer/search.html" ,current_cust=current_user)
+    elif request.method=="POST":
+        query = request.form.get("search_query")
+        print(query)
+        results = db.session.query(ServicePackage).filter( ServicePackage.name.ilike(f"%{query}%")).all()
+        return render_template("/customer/search.html" , current_cust=current_user , search_result =results )
+
+
 
 @app.route("/professional/dashboard")
 @login_required
