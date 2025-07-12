@@ -19,6 +19,7 @@ class ServiceCategory(db.Model):
     name = db.Column(db.String  ,unique=True, nullable = False)
     professionals= db.relationship("ServiceProfessional" , backref="category" )
     packages= db.relationship("ServicePackage" , backref="category" )
+    bookings= db.relationship("Booking" , backref="category" )
 
     
 class User(db.Model , UserMixin):
@@ -69,6 +70,7 @@ class Booking(db.Model):
     pack_id = db.Column(db.Integer, db.ForeignKey("package.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     prof_id = db.Column(db.Integer, db.ForeignKey("professional.id"), nullable=False)
+    cat_id = db.Column(db.Integer , db.ForeignKey("category.id"))
     date = db.Column(db.String,nullable =False )
     time = db.Column(db.String,nullable =False ) 
     status = db.Column(db.String, nullable=False)

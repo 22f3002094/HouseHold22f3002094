@@ -4,6 +4,9 @@ from .models import db, Admin , ServiceCategory, User , ServiceProfessional , Se
 from flask_login import login_user , login_required , current_user
 from flask_sqlalchemy import SQLAlchemy 
 from datetime import datetime
+import matplotlib.pylab as plt
+import matplotlib
+matplotlib.use("agg")
 
 from sqlalchemy import and_ 
 
@@ -437,7 +440,26 @@ def booking():
             return redirect("/customer/dashboard")
        
         
+@app.route("/admin/stats")
+def admin_stats():
+    if request.method=="GET":
+        cats = db.session.query(ServiceCategory).all()
+        cat_names  = []
+        book_count = []
+        for cat in cats:
+            cat_names.append(cat.name)
+            book_count.append(len(cat.bookings))
+        plt.bar(x = cat_names , height=book_count )
+        plt.savefig("./static/admin/category_wise_bookingcount.png")
+        plt.close()
+        return render_template("/admin/stats.html")
+        
 
+
+
+
+["Home Cleaning" , "Gardening" , "Electrician"]
+[5, 2 , 3]
 
 
 
