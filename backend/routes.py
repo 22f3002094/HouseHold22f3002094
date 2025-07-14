@@ -452,14 +452,17 @@ def admin_stats():
         plt.bar(x = cat_names , height=book_count )
         plt.savefig("./static/admin/category_wise_bookingcount.png")
         plt.close()
+
+        
+
         return render_template("/admin/stats.html")
         
 
 
 
 
-["Home Cleaning" , "Gardening" , "Electrician"]
-[5, 2 , 3]
+# ["Home Cleaning" , "Gardening" , "Electrician"]
+# [5, 2 , 3]
 
 
 
